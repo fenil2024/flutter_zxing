@@ -389,7 +389,7 @@ class _ReaderWidgetState extends State<ReaderWidget> with TickerProviderStateMix
         if (widget.showScannerOverlay && !widget.isMultiScan)
           Stack(
             alignment: Alignment.center,
-            children: [
+            children: <Widget>[
               Container(
                 decoration: ShapeDecoration(
                   shape: widget.scannerOverlay ??
@@ -406,11 +406,11 @@ class _ReaderWidgetState extends State<ReaderWidget> with TickerProviderStateMix
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
+                children: <Widget>[
                   const Padding(
                     padding: EdgeInsets.only(top: 15, bottom: 10),
                     child: Text(
-                      "Scan Qr Code",
+                      'Scan Qr Code',
                       style: TextStyle(color: Colors.white, fontSize: 25),
                     ),
                   ),
