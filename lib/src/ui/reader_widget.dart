@@ -38,7 +38,7 @@ class ReaderWidget extends StatefulWidget {
     this.flashOffIcon = const Icon(Icons.flash_off),
     this.flashAlwaysIcon = const Icon(Icons.flash_on),
     this.flashAutoIcon = const Icon(Icons.flash_auto),
-    this.galleryIcon = const Icon(Icons.photo_library),
+    this.galleryIcon = const Icon(Icons.insert_photo_rounded),
     this.toggleCameraIcon = const Icon(Icons.switch_camera),
     this.actionButtonsBackgroundColor = Colors.black,
     this.actionButtonsBackgroundBorderRadius,
@@ -48,8 +48,7 @@ class ReaderWidget extends StatefulWidget {
     this.cropPercent = 0.5, // 50% of the screen
     this.resolution = ResolutionPreset.high,
     this.lensDirection = CameraLensDirection.back,
-    this.loading =
-        const DecoratedBox(decoration: BoxDecoration(color: Colors.black)),
+    this.loading = const DecoratedBox(decoration: BoxDecoration(color: Colors.black)),
   });
 
   /// Called when a code is detected
@@ -65,8 +64,7 @@ class ReaderWidget extends StatefulWidget {
   final Function(Codes)? onMultiScanFailure;
 
   /// Called when the camera controller is created
-  final Function(CameraController? controller, Exception? error)?
-      onControllerCreated;
+  final Function(CameraController? controller, Exception? error)? onControllerCreated;
 
   /// Called when the multi scan mode is changed
   /// When set to null, the multi scan mode button will not be displayed
@@ -163,8 +161,7 @@ class ReaderWidget extends StatefulWidget {
   State<ReaderWidget> createState() => _ReaderWidgetState();
 }
 
-class _ReaderWidgetState extends State<ReaderWidget>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+class _ReaderWidgetState extends State<ReaderWidget> with TickerProviderStateMixin, WidgetsBindingObserver {
   List<CameraDescription> cameras = <CameraDescription>[];
   CameraDescription? selectedCamera;
   CameraController? controller;
@@ -201,8 +198,7 @@ class _ReaderWidgetState extends State<ReaderWidget>
         this.cameras = cameras;
         if (cameras.isNotEmpty) {
           selectedCamera = cameras.firstWhere(
-            (CameraDescription camera) =>
-                camera.lensDirection == widget.lensDirection,
+            (CameraDescription camera) => camera.lensDirection == widget.lensDirection,
             orElse: () => cameras.first,
           );
           onNewCameraSelected(selectedCamera);
@@ -284,12 +280,8 @@ class _ReaderWidgetState extends State<ReaderWidget>
     }
 
     try {
-      cameraController
-          .getMaxZoomLevel()
-          .then((double value) => _maxZoomLevel = value);
-      cameraController
-          .getMinZoomLevel()
-          .then((double value) => _minZoomLevel = value);
+      cameraController.getMaxZoomLevel().then((double value) => _maxZoomLevel = value);
+      cameraController.getMinZoomLevel().then((double value) => _minZoomLevel = value);
     } catch (e) {
       debugPrint('Error: $e');
     }
@@ -309,8 +301,7 @@ class _ReaderWidgetState extends State<ReaderWidget>
       _isProcessing = true;
       try {
         final double cropPercent = widget.isMultiScan ? 0 : widget.cropPercent;
-        final int cropSize =
-            (min(image.width, image.height) * cropPercent).round();
+        final int cropSize = (min(image.width, image.height) * cropPercent).round();
         final DecodeParams params = DecodeParams(
           imageFormat: _imageFormat(image.format.group),
           format: widget.codeFormat,
@@ -362,10 +353,8 @@ class _ReaderWidgetState extends State<ReaderWidget>
 
   @override
   Widget build(BuildContext context) {
-    final bool isCameraReady = cameras.isNotEmpty &&
-        _isCameraOn &&
-        controller != null &&
-        controller!.value.isInitialized;
+    final bool isCameraReady =
+        cameras.isNotEmpty && _isCameraOn && controller != null && controller!.value.isInitialized;
     final Size size = MediaQuery.of(context).size;
     final double cameraMaxSize = max(size.width, size.height);
     final double cropSize = min(size.width, size.height) * widget.cropPercent;
@@ -384,9 +373,7 @@ class _ReaderWidgetState extends State<ReaderWidget>
                     width: cameraMaxSize,
                     child: CameraPreview(
                       controller!,
-                      child: widget.showScannerOverlay &&
-                              widget.isMultiScan &&
-                              results.codes.isNotEmpty
+                      child: widget.showScannerOverlay && widget.isMultiScan && results.codes.isNotEmpty
                           ? MultiResultOverlay(
                               results: results.codes,
                               onCodeTap: widget.onScan,
@@ -400,18 +387,77 @@ class _ReaderWidgetState extends State<ReaderWidget>
             ),
           ),
         if (widget.showScannerOverlay && !widget.isMultiScan)
-          Container(
-            decoration: ShapeDecoration(
-              shape: widget.scannerOverlay ??
-                  FixedScannerOverlay(
-                    borderColor: Theme.of(context).primaryColor,
-                    overlayColor: Colors.black45,
-                    borderRadius: 1,
-                    borderLength: 16,
-                    borderWidth: 8,
-                    cutOutSize: cropSize,
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                decoration: ShapeDecoration(
+                  shape: widget.scannerOverlay ??
+                      FixedScannerOverlay(
+                        borderColor: Colors.white,
+                        // Theme.of(context).primaryColor,
+                        overlayColor: Colors.black45,
+                        borderRadius: 1,
+                        borderLength: 16,
+                        borderWidth: 8,
+                        cutOutSize: cropSize,
+                      ),
+                ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 15, bottom: 10),
+                    child: Text(
+                      "Scan Qr Code",
+                      style: TextStyle(color: Colors.white, fontSize: 25),
+                    ),
                   ),
-            ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        if (widget.showFlashlight && _isFlashAvailable)
+                          Card(
+                            color: Colors.black45,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: GestureDetector(
+                                onTap: _onFlashButtonTapped,
+                                child: _flashIcon(controller?.value.flashMode ?? FlashMode.off),
+                              ),
+                            ),
+                          ),
+                        if (widget.showGallery)
+                          Card(
+                            color: Colors.black45,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: GestureDetector(
+                                onTap: _onGalleryButtonTapped,
+                                child: widget.galleryIcon,
+                              ),
+                            ),
+                          ),
+                        if (widget.showToggleCamera)
+                          Card(
+                            color: Colors.black45,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: GestureDetector(
+                                onTap: _onCameraButtonTapped,
+                                child: widget.toggleCameraIcon,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         if (widget.allowPinchZoom)
           GestureDetector(
@@ -419,50 +465,47 @@ class _ReaderWidgetState extends State<ReaderWidget>
               _zoom = _scaleFactor;
             },
             onScaleUpdate: (ScaleUpdateDetails details) {
-              _scaleFactor =
-                  (_zoom * details.scale).clamp(_minZoomLevel, _maxZoomLevel);
+              _scaleFactor = (_zoom * details.scale).clamp(_minZoomLevel, _maxZoomLevel);
               controller?.setZoomLevel(_scaleFactor);
             },
           ),
-        SafeArea(
-          child: Align(
-            alignment: widget.actionButtonsAlignment,
-            child: Padding(
-              padding: widget.actionButtonsPadding,
-              child: ClipRRect(
-                borderRadius: widget.actionButtonsBackgroundBorderRadius ??
-                    BorderRadius.circular(10.0),
-                child: Container(
-                  color: widget.actionButtonsBackgroundColor,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      if (widget.showFlashlight && _isFlashAvailable)
-                        IconButton(
-                          onPressed: _onFlashButtonTapped,
-                          color: Colors.white,
-                          icon: _flashIcon(
-                              controller?.value.flashMode ?? FlashMode.off),
-                        ),
-                      if (widget.showGallery)
-                        IconButton(
-                          onPressed: _onGalleryButtonTapped,
-                          color: Colors.white,
-                          icon: widget.galleryIcon,
-                        ),
-                      if (widget.showToggleCamera)
-                        IconButton(
-                          onPressed: _onCameraButtonTapped,
-                          color: Colors.white,
-                          icon: widget.toggleCameraIcon,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        // SafeArea(
+        //   child: Align(
+        //     alignment: widget.actionButtonsAlignment,
+        //     child: Padding(
+        //       padding: widget.actionButtonsPadding,
+        //       child: ClipRRect(
+        //         borderRadius: widget.actionButtonsBackgroundBorderRadius ?? BorderRadius.circular(10.0),
+        //         child: Container(
+        //           color: widget.actionButtonsBackgroundColor,
+        //           child: Row(
+        //             mainAxisSize: MainAxisSize.min,
+        //             children: <Widget>[
+        //               if (widget.showFlashlight && _isFlashAvailable)
+        //                 IconButton(
+        //                   onPressed: _onFlashButtonTapped,
+        //                   color: Colors.white,
+        //                   icon: _flashIcon(controller?.value.flashMode ?? FlashMode.off),
+        //                 ),
+        //               if (widget.showGallery)
+        //                 IconButton(
+        //                   onPressed: _onGalleryButtonTapped,
+        //                   color: Colors.white,
+        //                   icon: widget.galleryIcon,
+        //                 ),
+        //               if (widget.showToggleCamera)
+        //                 IconButton(
+        //                   onPressed: _onCameraButtonTapped,
+        //                   color: Colors.white,
+        //                   icon: widget.toggleCameraIcon,
+        //                 ),
+        //             ],
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
         if (widget.onMultiScanModeChanged != null)
           SafeArea(
             child: ScanModeDropdown(
@@ -493,8 +536,7 @@ class _ReaderWidgetState extends State<ReaderWidget>
   }
 
   Future<void> _onGalleryButtonTapped() async {
-    final XFile? file =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final XFile? file = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (file != null) {
       final DecodeParams params = DecodeParams(
         imageFormat: zxing.ImageFormat.rgb,
